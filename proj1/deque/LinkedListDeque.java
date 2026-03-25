@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class LinkedListDeque<T> implements Iterable<T>{
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private int size;
     private Node sentinel;
 
@@ -91,6 +91,15 @@ public class LinkedListDeque<T> implements Iterable<T>{
             index -= 1;
         }
         return null;
+    }
+    public T getRecursive(int index) {
+        if (index < 0) return null;
+        if (index >= size) return null;
+        return helper(sentinel.next, index);
+    }
+    public T helper(Node node, int index) {
+        if (index == 0) return node.item;
+        return helper(node.next, index - 1);
     }
     public boolean equals(Object o) {
         if (o == null) return false;

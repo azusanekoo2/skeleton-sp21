@@ -1,9 +1,10 @@
 package deque;
 
+
 import java.util.Iterator;
 import java.util.Objects;
 
-public class ArrayDeque<T> implements Iterable<T> {
+public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     private int size;
     private T[] items;
     private int nextFirst;
