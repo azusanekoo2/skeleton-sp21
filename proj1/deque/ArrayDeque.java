@@ -90,8 +90,10 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         T returnItem;
         if (nextFirst + 1 < items.length) {
             returnItem = items[nextFirst + 1];
+            items[nextFirst + 1] = null;
         } else {
             returnItem = items[nextFirst + 1 - items.length];
+            items[nextFirst + 1 - items.length] = null;
         }
         nextFirst += 1;
         if (nextFirst == items.length) {
@@ -126,22 +128,11 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     }
 
     public T get(int index) {
-        if (index < 0 && index >= size) {
+        if (index < 0 || index >= size) {
             return null;
         }
-        int k = nextFirst;
-        while (index != 0) {
-            index -= 1;
-            k += 1;
-            if (k == items.length) {
-                k = 0;
-            }
-        }
-        if (k + 1 < items.length) {
-            return items[k + 1];
-        } else {
-            return items[k + 1 - items.length];
-        }
+        int realIndex = (nextFirst + 1 + index) % items.length;
+        return items[realIndex];
     }
 
     public boolean equals(Object o) {
