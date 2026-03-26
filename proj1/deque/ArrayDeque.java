@@ -20,7 +20,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         private int i;
         private int n;
 
-        public ArrayDequeIterator() {
+        ArrayDequeIterator() {
             if (nextFirst + 1 < items.length) {
                 i = nextFirst + 1;
             } else {
