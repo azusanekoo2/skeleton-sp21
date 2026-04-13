@@ -5,6 +5,7 @@ package gitlet;
  */
 public class Main {
 
+
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
@@ -14,11 +15,78 @@ public class Main {
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                if (args.length != 1) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.init();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.add(args[1]);
                 break;
             // TODO: FILL THE REST IN
+            case "rm":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.rm(args[1]);
+                break;
+            case "commit":
+                if (args.length == 1) {
+                    System.out.println("Please enter a commit message.");
+                    return;
+                } else if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.commit(args[1]);
+                break;
+            case "log":
+                if (args.length != 1) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.log();
+                break;
+            case "global-log":
+                if (args.length != 1) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.globalLog();
+                break;
+            case "find":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.find(args[1]);
+                break;
+            case "status":
+                if (args.length != 1) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.status();
+                break;
+            case "checkout":
+                if (args.length == 3) {
+                    Repository.checkoutFile(args[2]);
+                } else if (args.length == 4) {
+                    Repository.checkoutCommitFile(args[1], args[3]);
+                } else if (args.length == 2) {
+                    Repository.checkoutBranch(args[1]);
+                } else {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                break;
         }
     }
 }
