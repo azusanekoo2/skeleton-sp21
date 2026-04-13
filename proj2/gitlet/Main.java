@@ -11,7 +11,15 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO: what if args is empty?
+        if (args.length == 0) {
+            System.out.println("Please enter a command.");
+            return;
+        }
         String firstArg = args[0];
+        if (!firstArg.equals("init") && !Repository.GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            return;
+        }
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
@@ -76,9 +84,9 @@ public class Main {
                 Repository.status();
                 break;
             case "checkout":
-                if (args.length == 3) {
+                if (args.length == 3 && args[1].equals("--")) {
                     Repository.checkoutFile(args[2]);
-                } else if (args.length == 4) {
+                } else if (args.length == 4 && args[2].equals("--")) {
                     Repository.checkoutCommitFile(args[1], args[3]);
                 } else if (args.length == 2) {
                     Repository.checkoutBranch(args[1]);
@@ -87,6 +95,8 @@ public class Main {
                     return;
                 }
                 break;
+            default:
+                System.out.println("No command with that name exists.");
         }
     }
 }

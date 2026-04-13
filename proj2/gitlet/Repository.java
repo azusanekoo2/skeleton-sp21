@@ -168,6 +168,7 @@ public class Repository {
     }
 
     private static void printLogChain(String commitId) {
+        printOneCommit(commitId);
         Commit currentCommit = readObject(join(COMMITS_DIR, commitId), Commit.class);
         String parentId = currentCommit.getParent();
         if (parentId == null) {
