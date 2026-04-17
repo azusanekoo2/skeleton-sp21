@@ -279,8 +279,54 @@ public class Repository {
         }
         String branchCommitId = readContentsAsString(branchFile);
         Commit branchCommit = readObject(join(COMMITS_DIR, branchCommitId), Commit.class);
+        if (!checkoutCommitSnapshot(branchCommitId, branchCommit)) {
+            return;
+        }
+        writeContents(HEAD_FILE, branchName);
+    }
+
+    public static void branch(String branchName) {
+        File branchFile = join(BRANCHES_DIR, branchName);
+        if (branchFile.exists()) {
+            System.out.println("A branch with that name already exists.");
+            return;
+        }
+        String commitId = getHeadCommitId();
+        writeContents(branchFile, commitId);
+    }
+
+    public static void rmBranch(String branchName) {
+        File branchFile = join(BRANCHES_DIR, branchName);
+        if (!branchFile.exists()) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        }
+        String currBranchName = readContentsAsString(HEAD_FILE);
+        if (currBranchName.equals(branchName)) {
+            System.out.println("Cannot remove the current branch.");
+            return;
+        }
+        branchFile.delete();
+    }
+
+    public static void reset(String commitId) {
+        File commitFile = join(COMMITS_DIR, commitId);
+        if (!commitFile.exists()) {
+            System.out.println("No commit with that id exists.");
+            return;
+        }
+        Commit targetCommit = readObject(commitFile, Commit.class);
+        if (!checkoutCommitSnapshot(commitId, targetCommit)) {
+            return;
+        }
+        String currBranch = readContentsAsString(HEAD_FILE);
+        File branchFile = join(BRANCHES_DIR, currBranch);
+        writeContents(branchFile, commitId);
+    }
+
+    public static boolean checkoutCommitSnapshot(String targetCommitId, Commit targetCommit) {
         Commit currentCommit = getHeadCommit();
-        Map<String, String> targetTrackedFiles = branchCommit.getTrackedFiles();
+        Map<String, String> targetTrackedFiles = targetCommit.getTrackedFiles();
         Map<String, String> currentTrackedFiles = currentCommit.getTrackedFiles();
         HashMap<String, String> stageAdd = readObject(STAGE_ADD_FILE, HashMap.class);
         HashSet<String> stageRemove = readObject(STAGE_REMOVE_FILE, HashSet.class);
@@ -289,11 +335,11 @@ public class Repository {
                     && !currentTrackedFiles.containsKey(file)
                     && !stageAdd.containsKey(file)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                return;
+                return false;
             }
         }
         for (String file : targetTrackedFiles.keySet()) {
-            checkoutCommitFile(branchCommitId, file);
+            checkoutCommitFile(targetCommitId, file);
         }
         for (String fileName : currentTrackedFiles.keySet()) {
             if (!targetTrackedFiles.containsKey(fileName)) {
@@ -304,6 +350,6 @@ public class Repository {
         stageAdd.clear();
         writeObject(STAGE_ADD_FILE, stageAdd);
         writeObject(STAGE_REMOVE_FILE, stageRemove);
-        writeContents(HEAD_FILE, branchName);
+        return true;
     }
 }

@@ -95,6 +95,27 @@ public class Main {
                     return;
                 }
                 break;
+            case "branch":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.branch(args[1]);
+                break;
+            case "rm-branch":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.rmBranch(args[1]);
+                break;
+            case "reset":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.reset(args[1]);
+                break;
             default:
                 System.out.println("No command with that name exists.");
         }
