@@ -25,12 +25,14 @@ public class Commit implements Serializable {
     private String message;
     private Date timestamp;
     private String parent;
+    private String secondParent;
     private Map<String, String> trackedFiles;
     /* TODO: fill in the rest of this class. */
-    public Commit(String message, Date timestamp, String parent, Map<String, String> trackedFiles) {
+    public Commit(String message, Date timestamp, String parent, String secondParent, Map<String, String> trackedFiles) {
         this.message = message;
         this.timestamp = timestamp;
         this.parent = parent;
+        this.secondParent = secondParent;
         this.trackedFiles = trackedFiles;
     }
     public String getBlobId(String fileName) {
@@ -47,5 +49,8 @@ public class Commit implements Serializable {
     }
     public String getParent() {
         return parent;
+    }
+    public String getSecondParent() {
+        return secondParent;
     }
 }

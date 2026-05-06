@@ -116,6 +116,13 @@ public class Main {
                 }
                 Repository.reset(args[1]);
                 break;
+            case "merge":
+                if (args.length != 2) {
+                    System.out.println("Incorrect operands.");
+                    return;
+                }
+                Repository.merge(args[1]);
+                break;
             default:
                 System.out.println("No command with that name exists.");
         }
