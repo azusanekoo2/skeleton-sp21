@@ -270,7 +270,8 @@ public class Repository {
 
     public static void checkoutCommitFile(String commitId, String fileName) {
         File file = join(CWD, fileName);
-        File commitFile = join(COMMITS_DIR, commitId);
+
+        File commitFile = join(COMMITS_DIR, resolveCommitId(commitId));
         if (!commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             return;
@@ -285,6 +286,20 @@ public class Repository {
         File blobFile = join(BLOBS_DIR, blobId);
         byte[] content = readContents(blobFile);
         writeContents(file, content);
+    }
+
+    private static String resolveCommitId(String commitId) {
+        File commitFile = join(COMMITS_DIR, commitId);
+        if (commitFile.exists()) {
+            return commitId;
+        }
+        List<String> commitIds = plainFilenamesIn(COMMITS_DIR);
+        for (String id : commitIds) {
+            if (id.startsWith(commitId)) {
+                return id;
+            }
+        }
+        return null;
     }
 
     public static void checkoutBranch(String branchName) {
@@ -331,7 +346,7 @@ public class Repository {
     }
 
     public static void reset(String commitId) {
-        File commitFile = join(COMMITS_DIR, commitId);
+        File commitFile = join(COMMITS_DIR, resolveCommitId(commitId));
         if (!commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             return;
