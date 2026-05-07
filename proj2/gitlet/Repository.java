@@ -270,8 +270,12 @@ public class Repository {
 
     public static void checkoutCommitFile(String commitId, String fileName) {
         File file = join(CWD, fileName);
-
-        File commitFile = join(COMMITS_DIR, resolveCommitId(commitId));
+        String fullCommitId = resolveCommitId(commitId);
+        if (fullCommitId == null) {
+            System.out.println("No commit with that id exists.");
+            return;
+        }
+        File commitFile = join(COMMITS_DIR, fullCommitId);
         if (!commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             return;
@@ -346,7 +350,12 @@ public class Repository {
     }
 
     public static void reset(String commitId) {
-        File commitFile = join(COMMITS_DIR, resolveCommitId(commitId));
+        String fullCommitId = resolveCommitId(commitId);
+        if (fullCommitId == null) {
+            System.out.println("No commit with that id exists.");
+            return;
+        }
+        File commitFile = join(COMMITS_DIR, fullCommitId);
         if (!commitFile.exists()) {
             System.out.println("No commit with that id exists.");
             return;
