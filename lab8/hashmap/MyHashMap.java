@@ -172,7 +172,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
     }
 
-    public HashSet<K> keySet() {
+    public Set<K> keySet() {
         return new HashSet<>(keys);
     }
 
