@@ -1,0 +1,5 @@
+For random insertion, MyHashMap is much faster than ULLMap because it uses hashing and separate chaining, so insertions are amortized constant time when keys are well distributed. ULLMap must scan a list, so it grows much more slowly.
+
+For in-order insertion, MyHashMap still performs well because hash maps do not depend on key order. This differs from an unbalanced BSTMap, which can degrade badly on sorted input.
+
+For different bucket types, the results mostly show constant-factor differences. Since MyHashMap searches each bucket by iterating over the Collection, TreeSet and HashSet buckets do not automatically provide logarithmic or constant-time bucket lookup in this implementation.
