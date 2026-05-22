@@ -73,6 +73,10 @@ public class Engine {
         connectAllRooms(finalWorldFrame, centers);
         addWallsAroundFloors(finalWorldFrame);
         addAvatar(finalWorldFrame, centers);
+        String moves = parseMoves(input);
+        for (int i = 0; i < moves.length(); i++) {
+            moveAvatar(finalWorldFrame, moves.charAt(i));
+        }
         return finalWorldFrame;
     }
 
@@ -199,10 +203,39 @@ public class Engine {
         }
     }
 
-
     private void addAvatar(TETile[][] world, List<Position> centers) {
         if (!centers.isEmpty()) {
             avatarPosition = centers.get(0);
+            world[avatarPosition.x][avatarPosition.y] = Tileset.AVATAR;
+        }
+    }
+
+    private static String parseMoves(String input) {
+        String upper = input.toUpperCase();
+        int sIndex = upper.indexOf('S');
+        String move = upper.substring(sIndex + 1);
+        return move;
+    }
+
+    private void moveAvatar(TETile[][] world, char move) {
+        if (move == 'W') {
+            moveAvatarBy(world, 0, 1);
+        } else if (move == 'A') {
+            moveAvatarBy(world, -1, 0);
+        } else if (move == 'S') {
+            moveAvatarBy(world, 0, -1);
+        } else if (move == 'D') {
+            moveAvatarBy(world, 1, 0);
+        }
+    }
+
+    private void moveAvatarBy(TETile[][] world, int dx, int dy) {
+        int nextX = avatarPosition.x + dx;
+        int nextY = avatarPosition.y + dy;
+        if (world[nextX][nextY] == Tileset.FLOOR) {
+            world[avatarPosition.x][avatarPosition.y] = Tileset.FLOOR;
+            avatarPosition.x = nextX;
+            avatarPosition.y = nextY;
             world[avatarPosition.x][avatarPosition.y] = Tileset.AVATAR;
         }
     }
