@@ -5,7 +5,7 @@ After looking at your own implementation, consider the implementation provided n
 How did your implementation differ from the given one? What lessons can be learned from it?**
 
 Answer:
-
+1
 -----
 
 **Can you think of an analogy between the process of tessellating hexagons and randomly generating a world using rooms and hallways?
