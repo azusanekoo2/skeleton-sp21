@@ -3,7 +3,13 @@ package byow.Core;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+import edu.princeton.cs.introcs.StdDraw;
 
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -30,6 +36,36 @@ public class Engine {
     }
 
     public void interactWithKeyboard() {
+        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
+        StdDraw.setXscale(0, WIDTH);
+        StdDraw.setYscale(0, HEIGHT);
+        StdDraw.enableDoubleBuffering();
+
+        drawMainMenu();
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toUpperCase(StdDraw.nextKeyTyped());
+                if (key == 'N') {
+                    String seed = readSeedFromKeyboard();
+                    TETile[][] world = interactWithInputString("N" + seed + "S");
+                    ter.initialize(WIDTH, HEIGHT);
+                    ter.renderFrame(world);
+                    playGameWithKeyboard(world, "N" + seed + "S");
+                    return;
+                } else if (key == 'L') {
+                    String inputHistory = loadGame();
+                    TETile[][] world = interactWithInputString(inputHistory);
+
+                    ter.initialize(WIDTH, HEIGHT);
+                    ter.renderFrame(world);
+
+                    playGameWithKeyboard(world, inputHistory);
+                    return;
+                } else if (key == 'Q') {
+                    return;
+                }
+            }
+        }
     }
 
     /**
@@ -54,14 +90,14 @@ public class Engine {
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
-        // passed in as an argument, and return a 2D tile representation of the
-        // world that would have been drawn if the same inputs had been given
-        // to interactWithKeyboard().
-        //
-        // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
-        // that works for many different input types.
-        long seed = parseSeed(input);
+        String upper = input.toUpperCase();
+        if (upper.startsWith("L")) {
+            String savedInput = loadGame();
+            String newMoves = upper.substring(1);
+            input = savedInput + newMoves;
+        }
+        String cleanedInput = cleanInputBeforeSave(input);
+        long seed = parseSeed(cleanedInput);
         Random random = new Random(seed);
         TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
         for (int x = 0; x < WIDTH; x++) {
@@ -73,9 +109,13 @@ public class Engine {
         connectAllRooms(finalWorldFrame, centers);
         addWallsAroundFloors(finalWorldFrame);
         addAvatar(finalWorldFrame, centers);
-        String moves = parseMoves(input);
+
+        String moves = parseMoves(cleanedInput);
         for (int i = 0; i < moves.length(); i++) {
             moveAvatar(finalWorldFrame, moves.charAt(i));
+        }
+        if (input.toUpperCase().contains(":Q")) {
+            saveGame(cleanedInput);
         }
         return finalWorldFrame;
     }
@@ -83,7 +123,7 @@ public class Engine {
     private long parseSeed(String input) {
         String upper = input.toUpperCase();
         int sIndex = upper.indexOf('S');
-        String seedText = input.substring(1, sIndex);
+        String seedText = upper.substring(1, sIndex);
         long seed = Long.parseLong(seedText);
         return seed;
     }
@@ -103,7 +143,10 @@ public class Engine {
 
     private boolean canPlaceRoom(TETile[][] world, int startX, int startY, int width, int height) {
         boolean emptyPlace = true;
-        if (startX <= 0 || startY <= 0 || startX + width > world.length - 1 || startY + height > world[0].length - 1) {
+        if (startX <= 0
+                || startY <= 0
+                || startX + width > world.length - 1
+                || startY + height > world[0].length - 1) {
             return false;
         }
         for (int x = startX - 1; x < startX + width + 1; x++) {
@@ -238,5 +281,121 @@ public class Engine {
             avatarPosition.y = nextY;
             world[avatarPosition.x][avatarPosition.y] = Tileset.AVATAR;
         }
+    }
+
+    private void saveGame(String inputHistory) {
+        Path savePath = Paths.get("save.txt");
+        try {
+            Files.writeString(savePath, inputHistory);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String cleanInputBeforeSave(String input) {
+        String upper = input.toUpperCase();
+        int quitIndex = upper.indexOf(":Q");
+        if (quitIndex == -1) {
+            return input;
+        }
+        return input.substring(0, quitIndex);
+    }
+
+    private String loadGame() {
+        Path savePath = Paths.get("save.txt");
+        try {
+            return Files.readString(savePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void drawMainMenu() {
+        StdDraw.clear(Color.BLACK);
+        StdDraw.setPenColor(Color.WHITE);
+
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.7, "CS61B: THE GAME");
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.5, "New Game (N)");
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.45, "Load Game (L)");
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.4, "Quit (Q)");
+
+        StdDraw.show();
+    }
+
+    private String readSeedFromKeyboard() {
+        String seed = "";
+        while (true) {
+            drawSeedScreen(seed);
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toUpperCase(StdDraw.nextKeyTyped());
+                if (key == 'S' && seed.length() > 0) {
+                    return seed;
+                } else if (Character.isDigit(key)) {
+                    seed += key;
+                }
+            }
+        }
+    }
+
+    private void drawSeedScreen(String seed) {
+        StdDraw.clear(Color.BLACK);
+        StdDraw.setPenColor(Color.WHITE);
+
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.7, "Enter Seed");
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.55, seed);
+        StdDraw.text(WIDTH / 2.0, HEIGHT * 0.4, "Press S to start");
+
+        StdDraw.show();
+    }
+
+    private void playGameWithKeyboard(TETile[][] world, String inputHistory) {
+        boolean waitingForQ = false;
+        renderWorldWithHUD(world);
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toUpperCase(StdDraw.nextKeyTyped());
+                if (waitingForQ && key == 'Q') {
+                    saveGame(inputHistory);
+                    return;
+                }
+
+                waitingForQ = key == ':';
+                if (key == 'W' || key == 'A' || key == 'S' || key == 'D') {
+                    moveAvatar(world, key);
+                    inputHistory += key;
+                    renderWorldWithHUD(world);
+                }
+            }
+            StdDraw.pause(20);
+        }
+    }
+
+    private void renderWorldWithHUD(TETile[][] world) {
+        ter.renderFrame(world);
+
+        int mouseX = (int) StdDraw.mouseX();
+        int mouseY = (int) StdDraw.mouseY();
+
+        if (mouseX >= 0 && mouseX < WIDTH && mouseY >= 0 && mouseY < HEIGHT) {
+            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.textLeft(1, HEIGHT - 1, world[mouseX][mouseY].description());
+            StdDraw.show();
+        }
+    }
+
+    private static boolean sameWorld(TETile[][] a, TETile[][] b) {
+        if (a.length != b.length || a[0].length != b[0].length) {
+            return false;
+        }
+
+        for (int x = 0; x < a.length; x++) {
+            for (int y = 0; y < a[0].length; y++) {
+                if (a[x][y] != b[x][y]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
